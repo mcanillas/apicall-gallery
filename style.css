@@ -1,63 +1,53 @@
-/* Global */
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #f8f9fa;
   color: #212529;
 }
 
-/* Page title */
 .display-3 {
   font-weight: 700;
   letter-spacing: -1px;
 }
 
-/* Card styling */
 .card {
   border: none;
   background-color: #ffffff;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Subtle hover */
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* Character image container */
 .card img {
   object-fit: cover;
 }
 
-/* Character name */
 .card .h4 {
   font-weight: 600;
   margin-top: 1rem;
 }
 
-/* Info box */
 .card .border {
   border-color: #e9ecef !important;
   font-size: 0.95rem;
   color: #495057;
 }
 
-/* Rounded avatar background */
 .rounded-circle {
   background-color: #f1f3f5;
 }
 
-/* ===== Minimal font style ===== */
 body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   background-color: #fafafa;
   color: #222;
 }
 
-/* ===== Card sizing ===== */
 .character-card {
   height: 100%;
-  min-height: 480px;        /* force same height */
+  min-height: 480px;        
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -65,26 +55,22 @@ body {
   border: none;
 }
 
-/* Image container stays same size */
 .character-card .rounded-circle {
   width: 200px;
   height: 200px;
   margin: 0 auto;
 }
 
-/* Character name */
 .character-card .h4 {
   font-weight: 600;
   margin-top: 1rem;
 }
 
-/* Info box */
 .character-card .border {
   font-size: 0.95rem;
   line-height: 1.4;
 }
 
-/* Remove excessive card shadow for minimal look */
 .character-card {
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
