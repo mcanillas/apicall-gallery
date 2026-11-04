@@ -92,6 +92,43 @@ h2,
   color: var(--ink);
 }
 
+/* white logo sits in a dark badge in the middle of the nav */
+.site-nav .container {
+  position: relative;
+}
+
+.nav-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 3px 3px 0 var(--ketchup);
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-logo img {
+  width: 34px;
+  height: auto;
+}
+
+.nav-logo:hover {
+  box-shadow: 5px 5px 0 var(--ketchup);
+  transform: translate(-50%, -50%) rotate(-10deg) scale(1.08);
+}
+
+.nav-logo:focus-visible {
+  outline: 3px dashed var(--ink);
+  outline-offset: 4px;
+}
+
 .nav-link-pop {
   font-weight: 800;
   color: var(--ink);
@@ -454,7 +491,7 @@ h2,
   text-align: right;
 }
 
-/* highlight from "Surprise me" */
+/* highlight from the burger surprise */
 .character-card.picked {
   border-color: var(--ketchup);
   box-shadow: 8px 8px 0 var(--ketchup);
@@ -508,6 +545,17 @@ h2,
   .float-avatar:nth-child(n+2) img {
     width: 54px;
     height: 54px;
+  }
+}
+
+/* keep the brand from running into the centered logo on phones */
+@media (max-width: 575.98px) {
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  .nav-link-pop {
+    font-size: 0.9rem;
   }
 }
 
