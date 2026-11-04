@@ -245,6 +245,16 @@
 
     document.getElementById("retry").addEventListener("click", getCharacter);
 
+    // fade images in once they finish loading (load/error events don't bubble, so listen in the capture phase)
+    const markImage = (event, className) => {
+      if (event.target.tagName !== 'IMG') return;
+      var holder = event.target.closest('.avatar, .float-avatar');
+      if (holder) holder.classList.add(className);
+    };
+
+    document.addEventListener('load', (event) => markImage(event, 'is-loaded'), true);
+    document.addEventListener('error', (event) => markImage(event, 'is-broken'), true);
+
     // burger surprise: scroll to a random card and make it wiggle
     var pickedTimer;
     const surprise = () => {
