@@ -73,6 +73,8 @@
                 <span class="layer patty"></span>
                 <span class="layer bun-bottom"></span>
               </button>
+              <button type="button" class="burger3d" id="burger3d"
+                aria-label="Pick a random character (drag to spin the burger)"></button>
               <p class="burger-hint">Psst, click the burger for a surprise</p>
             </div>
           </div>
@@ -288,6 +290,9 @@
       pickedTimer = setTimeout(() => card.classList.remove('picked'), 3000);
     };
 
+    // the 3D burger (burger3d.js) calls this too
+    window.surprise = surprise;
+
     var burger = document.getElementById('burger');
     burger.addEventListener('click', () => {
       burger.classList.remove('squish');
@@ -346,6 +351,17 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
+
+  <!-- 3D burger: if Three.js fails to load, the CSS burger stays -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="burger3d.js"></script>
 </body>
 
 </html>
