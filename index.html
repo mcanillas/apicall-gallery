@@ -7,23 +7,74 @@
   <title>Bob's Burgers Characters</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="container mb-4">
-    <div class="row">
-      <div class="col">
-        <div class="display-3 my-3">
-          Bob's Burgers Characters
+  <nav class="site-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a class="brand" href="#top">Burger<span>Booth</span></a>
+      <div class="d-flex align-items-center gap-3">
+        <a class="nav-link-pop d-none d-sm-inline" href="#characters">Characters</a>
+        <button type="button" class="btn-pop btn-pop-sm surprise-btn">Surprise me</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 hero-text">
+          <span class="hero-tag">Now serving: 50 characters</span>
+          <h1 class="hero-title">Meet the Belchers <span>&amp; friends</span></h1>
+          <p class="hero-lead">
+            Browse the whole gang, with every detail pulled live from the Bob's Burgers API.
+            Order up!
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="#characters" class="btn-pop">Browse characters</a>
+            <button type="button" class="btn-pop btn-pop-light surprise-btn">Surprise me</button>
+          </div>
+          <ul class="hero-stats">
+            <li><strong id="stat-count">50</strong> characters</li>
+            <li><strong>Live</strong> API data</li>
+            <li><strong>Tap</strong> a card to zoom</li>
+          </ul>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="hero-art" id="hero-art">
+            <div id="avatars"></div>
+            <div class="burger-wrap">
+              <button type="button" class="burger" id="burger" aria-label="Pick a random character">
+                <span class="layer bun-top"></span>
+                <span class="layer lettuce"></span>
+                <span class="layer tomato"></span>
+                <span class="layer cheese"></span>
+                <span class="layer patty"></span>
+                <span class="layer bun-bottom"></span>
+              </button>
+              <p class="burger-hint">Psst, click the burger</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div class="container">
+  <div class="checker" aria-hidden="true"></div>
+
+  <main class="container py-5" id="characters">
+    <div class="section-head text-center">
+      <h2>The Gang</h2>
+      <p>Family, regulars, rivals and everyone in between.</p>
+    </div>
+
     <div class="row" id="contents">
 
     </div>
@@ -37,13 +88,16 @@
 
     <div class="text-center my-5 d-none" id="error" role="alert">
       <p class="text-danger mb-3" id="error-message"></p>
-      <button type="button" class="btn btn-dark" id="retry">Try again</button>
+      <button type="button" class="btn-pop" id="retry">Try again</button>
     </div>
-  </div>
+  </main>
 
-  <footer class="bg-dark text-center text-lg-start text-white">
-    <div class="text-center p-3">
-      © 2025 Marc Angelo Canillas. For Project Purposes.
+  <div class="checker" aria-hidden="true"></div>
+
+  <footer class="site-footer text-center">
+    <div class="p-4">
+      © 2025 Marc Angelo Canillas. For Project Purposes.<br>
+      <small>Fan project. Character data and images from the Bob's Burgers API.</small>
     </div>
   </footer>
 
@@ -54,23 +108,41 @@
           <img src="" id="modalImage" class="w-100" alt="Character Image">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn-pop btn-pop-sm" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
-  
+
   <script>
     var contents = document.getElementById("contents");
     var loading = document.getElementById("loading");
     var loadingCount = document.getElementById("loading-count");
     var errorBox = document.getElementById("error");
     var errorMessage = document.getElementById("error-message");
+    var statCount = document.getElementById("stat-count");
+    var avatars = document.getElementById("avatars");
     var total = 50;
+    var imageUrl = 'https://bobsburgers-api.herokuapp.com/images/characters/';
 
     const showError = (message) => {
       errorMessage.textContent = message;
       errorBox.classList.remove("d-none");
+    };
+
+    // put a few random characters floating around the burger
+    const showAvatars = (characters) => {
+      var picks = characters.slice().sort(() => Math.random() - 0.5).slice(0, 5);
+      var depths = [30, 18, 40, 24, 34];
+      var html = "";
+      picks.forEach((character, index) => {
+        html += `
+          <div class="float-avatar" style="--depth: ` + depths[index] + `;">
+            <img src="` + imageUrl + character.id + `.jpg" alt="` + character.name + `">
+          </div>
+        `;
+      });
+      avatars.innerHTML = html;
     };
 
     const getCharacter = async () => {
@@ -128,26 +200,25 @@
       characters.forEach(character => {
         html += `
     <div class="col-12 col-md-6 col-lg-4 mb-4 d-flex">
-      <div class="card my-3 shadow rounded-5 text-center character-card w-100" style="cursor:pointer;" data-img="` + 'https://bobsburgers-api.herokuapp.com/images/characters/' + character.id + '.jpg' + `">
+      <div class="card character-card w-100 text-center" data-img="` + imageUrl + character.id + '.jpg' + `">
 
-        <div class="mx-auto rounded-circle overflow-hidden"
-             style="width: 200px; height: 200px; background-color: #f5f5f5;">
+        <div class="avatar mx-auto">
           <img
-            src="` + 'https://bobsburgers-api.herokuapp.com/images/characters/' + character.id + '.jpg' + `"
+            src="` + imageUrl + character.id + '.jpg' + `"
             class="w-100 h-100 object-fit-cover"
             loading="lazy"
             alt="` + character.name + `">
         </div>
 
-        <div class="my-3 h4">
-          #` + character.id + ` ` + character.name + `
+        <div class="character-name">
+          <span class="character-number">#` + character.id + `</span> ` + character.name + `
         </div>
 
-        <div class="my-3 rounded-5 border py-2">
-          <strong>Gender:</strong> ` + character.gender + `<br>
-          <strong>Hair:</strong> ` + character.hair + `<br>
-          <strong>Age:</strong> ` + (character.age || "Unknown") + `<br>
-          <strong>Voiced By:</strong> ` + character.voicedBy + `
+        <div class="ticket">
+          <div><span>Gender</span><strong>` + character.gender + `</strong></div>
+          <div><span>Hair</span><strong>` + character.hair + `</strong></div>
+          <div><span>Age</span><strong>` + (character.age || "Unknown") + `</strong></div>
+          <div><span>Voiced by</span><strong>` + character.voicedBy + `</strong></div>
         </div>
 
       </div>
@@ -156,6 +227,8 @@
       });
 
       contents.innerHTML = html;
+      statCount.textContent = characters.length;
+      showAvatars(characters);
     };
 
     // one click listener on the grid, so it keeps working after a retry
@@ -169,8 +242,60 @@
 
     document.getElementById("retry").addEventListener("click", getCharacter);
 
+    // "Surprise me": scroll to a random card and make it wiggle
+    var pickedTimer;
+    const surprise = () => {
+      var cards = document.querySelectorAll('.character-card');
+      if (cards.length === 0) {
+        document.getElementById('characters').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      document.querySelectorAll('.character-card.picked').forEach(card => card.classList.remove('picked'));
+      var card = cards[Math.floor(Math.random() * cards.length)];
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('picked');
+
+      clearTimeout(pickedTimer);
+      pickedTimer = setTimeout(() => card.classList.remove('picked'), 3000);
+    };
+
+    document.querySelectorAll('.surprise-btn').forEach(button => {
+      button.addEventListener('click', surprise);
+    });
+
+    var burger = document.getElementById('burger');
+    burger.addEventListener('click', () => {
+      burger.classList.remove('squish');
+      void burger.offsetWidth; // restart the animation
+      burger.classList.add('squish');
+      surprise();
+    });
+
+    // tilt the burger and move the avatars with the pointer
+    var hero = document.getElementById('top');
+    var ticking = false;
+
+    hero.addEventListener('pointermove', (event) => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        var rect = hero.getBoundingClientRect();
+        var x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        var y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+        hero.style.setProperty('--px', x.toFixed(3));
+        hero.style.setProperty('--py', y.toFixed(3));
+        ticking = false;
+      });
+    });
+
+    hero.addEventListener('pointerleave', () => {
+      hero.style.setProperty('--px', 0);
+      hero.style.setProperty('--py', 0);
+    });
+
     getCharacter();
-    
+
   </script>
 
 
