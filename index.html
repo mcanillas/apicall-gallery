@@ -14,7 +14,22 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="is-loading">
+
+  <div class="preloader" id="preloader" role="status" aria-live="polite">
+    <div class="preloader-inner">
+      <div class="steam" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="preloader-burger" aria-hidden="true">
+        <span class="layer bun-top"></span>
+        <span class="layer lettuce"></span>
+        <span class="layer tomato"></span>
+        <span class="layer cheese"></span>
+        <span class="layer patty"></span>
+        <span class="layer bun-bottom"></span>
+      </div>
+      <p class="preloader-text">Cooking up the characters<span class="dots"></span></p>
+    </div>
+  </div>
 
   <nav class="site-nav">
     <div class="container d-flex align-items-center justify-content-between">
@@ -303,7 +318,27 @@
       hero.style.setProperty('--py', 0);
     });
 
-    getCharacter();
+    // preloader: stay long enough to finish building the burger, then slide away
+    var preloader = document.getElementById('preloader');
+    var preloaderStart = Date.now();
+    var preloaderDone = false;
+
+    const hidePreloader = () => {
+      if (preloaderDone) return;
+      preloaderDone = true;
+
+      var wait = Math.max(0, 1800 - (Date.now() - preloaderStart));
+      setTimeout(() => {
+        preloader.classList.add('is-done');
+        document.body.classList.remove('is-loading');
+        setTimeout(() => preloader.remove(), 1000);
+      }, wait);
+    };
+
+    // don't trap visitors behind the preloader if the API hangs
+    setTimeout(hidePreloader, 8000);
+
+    getCharacter().finally(hidePreloader);
 
   </script>
 
