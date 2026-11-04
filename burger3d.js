@@ -242,6 +242,9 @@ function main() {
   let spreadTarget = 0;
   let tiltX = 0, tiltY = 0, tiltTargetX = 0, tiltTargetY = 0;
   let squishStart = -1;
+  let launchStart = -1;
+  // how high each layer hops when clicked, bottom to top (the top bun flies highest)
+  const launchHeights = [0, 0, 0.08, 0.2, 0.35, 1.2];
   let introStart = reduceMotion ? -10000 : null;
 
   // drag to spin
@@ -269,14 +272,19 @@ function main() {
   container.addEventListener('pointerup', endDrag);
   container.addEventListener('pointercancel', endDrag);
 
-  // a click (not the end of a drag) squishes the burger and picks a character
+  // a click (not the end of a drag) pops the burger open and picks a character
   container.addEventListener('click', () => {
     if (wasDrag) {
       wasDrag = false;
       return;
     }
     squishStart = performance.now();
-    if (window.surprise) window.surprise();
+    launchStart = reduceMotion ? -1 : squishStart;
+
+    const rect = container.getBoundingClientRect();
+    if (window.surprise) {
+      window.surprise({ x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.35 });
+    }
   });
 
   // layers spread apart on hover or keyboard focus
@@ -319,6 +327,22 @@ function main() {
 
     spread += (spreadTarget - spread) * 0.12;
 
+    // click: the top bun flips up into the air and the layers under it hop
+    let launch = 0;
+    let flip = 0;
+    if (launchStart >= 0) {
+      const t = (now - launchStart) / 900;
+      if (t >= 1) {
+        launchStart = -1;
+      } else {
+        launch = Math.sin(Math.PI * t);
+        flip = (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) * Math.PI * 2;
+      }
+    }
+    const topBun = layers[layers.length - 1].object;
+    topBun.rotation.x = flip;
+    topBun.rotation.z = launch * 0.3;
+
     layers.forEach((layer, index) => {
       if (introStart === null) {
         layer.object.visible = false;
@@ -327,7 +351,7 @@ function main() {
       const t = Math.min(Math.max((now - introStart - 700 - index * 140) / 550, 0), 1);
       layer.object.visible = t > 0;
       const drop = (1 - easeOutBack(t)) * 3;
-      layer.object.position.y = layer.y + layer.spread * spread + drop;
+      layer.object.position.y = layer.y + layer.spread * spread + drop + launch * launchHeights[index];
     });
     shadow.visible = introStart !== null;
 

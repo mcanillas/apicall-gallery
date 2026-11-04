@@ -112,10 +112,30 @@
 
   <footer class="site-footer text-center">
     <div class="p-4">
-      © 2025 Marc Angelo Canillas. For Project Purposes.<br>
-      <small>Fan project. Character data and images from the Bob's Burgers API.</small>
+      © 2026 Marc Angelo Canillas.<br>
+      <small>Project purposes only. Character data and images from the Bob's Burgers API.</small>
     </div>
   </footer>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <div class="reveal" id="reveal" hidden>
+    <div class="reveal-backdrop" data-close></div>
+    <div class="reveal-rays" aria-hidden="true"></div>
+    <div class="reveal-card" role="dialog" aria-modal="true" aria-labelledby="reveal-name">
+      <div class="reveal-bell">Order up!</div>
+      <button type="button" class="reveal-close" data-close aria-label="Close">&times;</button>
+      <div class="avatar reveal-avatar" id="reveal-avatar">
+        <img src="" id="reveal-img" class="w-100 h-100 object-fit-cover" alt="">
+      </div>
+      <h3 class="character-name" id="reveal-name"></h3>
+      <div class="ticket" id="reveal-ticket"></div>
+      <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <button type="button" class="btn-pop btn-pop-sm" id="reveal-show">See their card</button>
+        <button type="button" class="btn-pop btn-pop-sm btn-pop-light" id="reveal-again">Another one!</button>
+      </div>
+    </div>
+  </div>
 
   <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -272,17 +292,12 @@
     document.addEventListener('load', (event) => markImage(event, 'is-loaded'), true);
     document.addEventListener('error', (event) => markImage(event, 'is-broken'), true);
 
-    // burger surprise: scroll to a random card and make it wiggle
-    var pickedTimer;
-    const surprise = () => {
-      var cards = document.querySelectorAll('.character-card');
-      if (cards.length === 0) {
-        document.getElementById('characters').scrollIntoView({ behavior: 'smooth' });
-        return;
-      }
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      document.querySelectorAll('.character-card.picked').forEach(card => card.classList.remove('picked'));
-      var card = cards[Math.floor(Math.random() * cards.length)];
+    // scroll to a card and make it wiggle
+    var pickedTimer;
+    const showCard = (card) => {
+      document.querySelectorAll('.character-card.picked').forEach(other => other.classList.remove('picked'));
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       card.classList.add('picked');
 
@@ -290,15 +305,132 @@
       pickedTimer = setTimeout(() => card.classList.remove('picked'), 3000);
     };
 
+    // center of an element on screen, where the confetti bursts from
+    const centerOf = (element) => {
+      var rect = element.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    };
+
+    // confetti in the burger colors, flying out from a point
+    var confettiColors = ['#e63946', '#ffc93c', '#6bbf59', '#fff6e5', '#f2a541', '#8ed1fc'];
+    const burstConfetti = (x, y) => {
+      if (reduceMotion) return;
+      var layer = document.getElementById('confetti');
+
+      for (var i = 0; i < 40; i++) {
+        var piece = document.createElement('span');
+        var size = 8 + Math.random() * 8;
+        var shape = i % 3;
+        piece.className = 'confetti-piece';
+        piece.style.left = x + 'px';
+        piece.style.top = y + 'px';
+        piece.style.width = (shape === 2 ? size * 0.6 : size) + 'px';
+        piece.style.height = (shape === 0 ? size * 0.5 : size) + 'px';
+        piece.style.background = confettiColors[i % confettiColors.length];
+        piece.style.borderRadius = shape === 1 ? '50%' : '3px';
+        layer.appendChild(piece);
+
+        // mostly upward, then falling down
+        var angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4;
+        var distance = 120 + Math.random() * 180;
+        var dx = Math.cos(angle) * distance;
+        var dy = Math.sin(angle) * distance;
+        var spin = (Math.random() - 0.5) * 720;
+
+        piece.animate([
+          { transform: 'translate(-50%, -50%) rotate(0deg)', opacity: 1 },
+          { transform: 'translate(' + dx + 'px, ' + dy + 'px) rotate(' + spin + 'deg)', opacity: 1, offset: 0.6 },
+          { transform: 'translate(' + dx * 1.15 + 'px, ' + (dy + 160) + 'px) rotate(' + spin * 1.5 + 'deg)', opacity: 0 }
+        ], {
+          duration: 1100 + Math.random() * 500,
+          easing: 'cubic-bezier(0.15, 0.8, 0.35, 1)'
+        }).onfinish = (event) => event.target.effect.target.remove();
+      }
+    };
+
+    // "Order up!" reveal card
+    var reveal = document.getElementById('reveal');
+    var revealAvatar = document.getElementById('reveal-avatar');
+    var revealImg = document.getElementById('reveal-img');
+    var revealCard = null;
+    var revealReturnFocus = null;
+
+    const openReveal = (card) => {
+      revealCard = card;
+      revealReturnFocus = document.activeElement;
+
+      document.getElementById('reveal-name').innerHTML = card.querySelector('.character-name').innerHTML;
+      document.getElementById('reveal-ticket').innerHTML = card.querySelector('.ticket').innerHTML;
+
+      revealAvatar.classList.remove('is-loaded', 'is-broken');
+      revealImg.alt = card.querySelector('img').alt;
+      revealImg.src = card.getAttribute('data-img');
+      // a cached image may already be done, so the load event won't fire again
+      if (revealImg.complete && revealImg.naturalWidth > 0) {
+        revealAvatar.classList.add('is-loaded');
+      }
+
+      reveal.hidden = false;
+      reveal.classList.remove('is-open');
+      void reveal.offsetWidth; // restart the pop-in animation
+      reveal.classList.add('is-open');
+      document.getElementById('reveal-show').focus({ preventScroll: true });
+    };
+
+    const closeReveal = () => {
+      if (reveal.hidden) return;
+      reveal.hidden = true;
+      reveal.classList.remove('is-open');
+      if (revealReturnFocus) revealReturnFocus.focus({ preventScroll: true });
+    };
+
+    // burger surprise: confetti, then reveal a random character
+    var revealTimer;
+    const surprise = (origin) => {
+      var cards = document.querySelectorAll('.character-card');
+      if (cards.length === 0) {
+        document.getElementById('characters').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      var card = cards[Math.floor(Math.random() * cards.length)];
+      origin = origin || { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      burstConfetti(origin.x, origin.y);
+
+      // wait for the top bun to fly up before showing the reveal
+      clearTimeout(revealTimer);
+      revealTimer = setTimeout(() => openReveal(card), reduceMotion ? 0 : 450);
+    };
+
     // the 3D burger (burger3d.js) calls this too
     window.surprise = surprise;
+
+    document.getElementById('reveal-show').addEventListener('click', () => {
+      var card = revealCard;
+      closeReveal();
+      if (card) showCard(card);
+    });
+
+    document.getElementById('reveal-again').addEventListener('click', (event) => {
+      var origin = centerOf(event.currentTarget);
+      closeReveal();
+      surprise(origin);
+    });
+
+    reveal.querySelectorAll('[data-close]').forEach(element => {
+      element.addEventListener('click', closeReveal);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeReveal();
+    });
 
     var burger = document.getElementById('burger');
     burger.addEventListener('click', () => {
       burger.classList.remove('squish');
       void burger.offsetWidth; // restart the animation
       burger.classList.add('squish');
-      surprise();
+      surprise(centerOf(burger));
     });
 
     // tilt the burger and move the avatars with the pointer
