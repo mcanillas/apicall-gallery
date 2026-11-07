@@ -951,6 +951,22 @@ h2,
   .nav-link-pop {
     font-size: 0.9rem;
   }
+
+  /* the nav is shorter here, so shrink the badge to keep it (and its shadow) clear of the bottom border */
+  .nav-logo {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+    box-shadow: 2px 2px 0 var(--ketchup);
+  }
+
+  .nav-logo img {
+    width: 26px;
+  }
+
+  .nav-logo:hover {
+    box-shadow: 3px 3px 0 var(--ketchup);
+  }
 }
 
 /* ---------- respect reduced motion ---------- */
